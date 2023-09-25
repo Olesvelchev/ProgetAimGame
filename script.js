@@ -7,7 +7,11 @@ const startBtn = document.querySelector("#start"),
     hitsEL = document.querySelector("#hits"),
     accuracyEl = document.querySelector("#accuracy"),
     hitsOver = document.querySelector("#hits-over"),
-    accuracyOver = document.querySelector("#accuracy-over");
+    accuracyOver = document.querySelector("#accuracy-over"),
+    hearts = document.querySelectorAll(".heart"),
+    restartBtns = document.querySelectorAll(".restart"),
+    fullScreenBtn = document.querySelector("#fullscreen"),
+    minimizeBtn = document.querySelector("#minimize");
 
 let time = 0
 unlimited = false,
@@ -105,6 +109,8 @@ function createRandomCircle() {
     circle.addEventListener("animationend", () => {
         circle.remove();
         createRandomCircle();
+        addMissed();
+        calculateAccuracy();
     });
 
     board.addEventListener("click", (e) => {
@@ -119,32 +125,105 @@ function createRandomCircle() {
         calculateAccuracy();
     })
 
-    function finishGame(){
+    function finishGame() {
         finish = false;
         clearInterval(interval);
         board.innerHTML = "";
-        screens[3].classList.add("");
+        screens[3].classList.add("up");
         hitsEL.innerHTML = 0;
         timeEl.innerHTML = "00:00";
         accuracy.innerHTML = "0%";
         hitsOver.innerHTML = hits;
-        accuracyOver.innerHTML = `${accuracy}%`; 
-
-
-
-    }
-    
-    function calculateAccuracy (){
-        accuracy = (hits/(hits + missed)) * 100;
-        accuracy =  accuracy.toFixed(2);
-        accuracyEl.innerHTML =  `${accuracy}%`;
+        accuracyOver.innerHTML = `${accuracy}%`;
     }
 
+    function addMissed() {
 
+        if (
+            hearts[0].classList.contains("dead") &&
+            hearts[1].classList.contains("dead") &&
+            hearts[2].classList.contains("dead") 
+            ) {
+                finishGame();
 
+        }
+        else {
+            missed++;
 
+            for (let i = 0; i < hearts.length; i++){
+                if(!hearts[i].classList.contains("dead")) {
+                    hearts[i].classList.add("dead");
+                    break;
+                }
+            }
+        }
+
+}
+
+    function calculateAccuracy() {
+        accuracy = (hits / (hits + missed)) * 100;
+        accuracy = accuracy.toFixed(2);
+        accuracyEl.innerHTML = `${accuracy}%`;
+    }
 
     function getRandomNumber(min, max) {
         return Math.random(Math.floor() * (man - min) + min);
     }
+}
+
+restartBtns.forEach((btn) =>{
+    btn.addEventListener("click", restartGame);
+});
+
+function restartGame() {
+    finishGame();
+    screens[1].classList.remove("up");
+    screens[2].classList.remove("up");
+    screens[3].classList.remove("up");
+    time = 0;
+    difficulty = 0;
+    hits = 0;
+    missed = 0;
+    accuracy = 0;
+    playinghits = false;
+    unlimited = false;
+    hearts.forEach((heart) => {
+        heart.classList.remove("dead");
+    });
+}
+
+fullScreenBtn.addEventListener("click" , fullScreen);
+
+let elem = document.documentElement;
+
+function fullScreen() {
+    if(elem.requestFullscreen) {
+        elem.requestFullscreen();
+    }else if(elem.mozRequestFullScreen) {
+        elem.mozRequestFullScreen();
+    }else if(elem.webkitRequestFullScreen) {
+        elem.webkitRequestFullScreen();
+    }else if (elem.msRequestFullScreen) {
+        elem.msRequestFullScreen();
+    }
+
+    fullScreenBtn.style.display - "none"
+    minimizeBtn.style.display - "block";
+}
+
+minimizeBtn.addEventListener("click" , minimize);
+
+function minimize() {
+    if (document.exitfullscreen) {
+        document.exitfullscreen();
+    }else if (document.mozCancelFullScreen) {
+        document.mozCancelFullScreen();
+    }else if (document.webkitExitFullScreen) {
+        document.webkitExitFullScreen();
+    }else if (document.msExitFullScreen) {
+        document.msExitFullScreen();
+    }
+
+    minimizeBtn.style.display - "none"
+    fullScreenBtn.style.display - "block";
 }
